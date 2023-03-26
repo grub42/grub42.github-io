@@ -1,35 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Dropdown Menu Example</title>
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-	<script>
-		$(document).ready(function() {
-			var proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-			var targetUrl = 'https://grub42.github.io/hass.json';
-
-			$.ajax({
-				url: proxyUrl + targetUrl,
-				method: 'GET',
-				dataType: 'json',
-				success: function(data) {
-					var contentDescriptors = data['content-descriptor'];
-
-					$.each(contentDescriptors, function(index, value) {
-						$('#content-descriptor-dropdown').append($('<option>', {
-							value: value['dcterms_description'],
-							text: value['dcterms_description']
-						}));
-					});
-				},
-				error: function(jqXHR, textStatus, errorThrown) {
-					console.log(textStatus, errorThrown);
-				}
-			});
-		});
-	</script>
+  <title>Content Descriptor Dropdown</title>
 </head>
 <body>
-	<select id="content-descriptor-dropdown"></select>
+  <label for="content-descriptor">Select a Content Descriptor:</label>
+  <select id="content-descriptor"></select>
+  <script>
+    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+    const url = 'https://vocabulary.curriculum.edu.au/MRAC/2022/06/LA/HASS/export/MRAC/2022/06/LA/HASS.jsonld';
+    const select = document.getElementById('content-descriptor');
+
+    fetch(proxyUrl + url)
+      .then(response => response.json())
+      .then(data => {
+        data.graph[0].hasTopConcept.forEach(concept => {
+          const option = document.createElement('option');
+          option.text = concept.prefLabel;
+          option.value = concept.notation;
+          select.appendChild(option);
+        });
+      })
+      .catch(error => console.error(error));
+  </script>
 </body>
 </html>
