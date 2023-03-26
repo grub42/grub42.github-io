@@ -1,27 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Content Descriptor Dropdown</title>
+	<title>Content Descriptors</title>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<style type="text/css">
+		select {
+			width: 200px;
+		}
+	</style>
 </head>
 <body>
-  <label for="content-descriptor">Select a Content Descriptor:</label>
-  <select id="content-descriptor"></select>
-  <script>
-    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-    const url = 'https://vocabulary.curriculum.edu.au/MRAC/2022/06/LA/HASS/export/MRAC/2022/06/LA/HASS.jsonld';
-    const select = document.getElementById('content-descriptor');
+	<h1>Content Descriptors</h1>
+	<label for="contentDescriptor">Choose a Content Descriptor:</label>
+	<select id="contentDescriptor">
+		<option value="">Select a Content Descriptor</option>
+	</select>
 
-    fetch(proxyUrl + url)
-      .then(response => response.json())
-      .then(data => {
-        data.graph[0].hasTopConcept.forEach(concept => {
-          const option = document.createElement('option');
-          option.text = concept.prefLabel;
-          option.value = concept.notation;
-          select.appendChild(option);
-        });
-      })
-      .catch(error => console.error(error));
-  </script>
+	<script>
+		$(document).ready(function() {
+			const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+			const apiUrl = 'https://vocabulary.curriculum.edu.au/MRAC/2022/06/LA/HASS/export/MRAC/2022/06/LA/HASS.rdf';
+			const requestUrl = proxyUrl + apiUrl;
+
+			$.get(requestUrl, function(data) {
+				const xml = $.parseXML(data);
+				const descriptors = $(xml).find('rdf\\:Description');
+				const contentDescriptorSelect = $('#contentDescriptor');
+
+				descriptors.each(function() {
+					const descriptor = $(this);
+					const label = descriptor.find('rdfs\\:label').text();
+
+					if (label !== '') {
+						contentDescriptorSelect.append('<option value="' + label + '">' + label + '</option>');
+					}
+				});
+			});
+		});
+	</script>
 </body>
 </html>
