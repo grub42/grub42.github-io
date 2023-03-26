@@ -1,42 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Content Descriptors</title>
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-	<style type="text/css">
-		select {
-			width: 200px;
-		}
-	</style>
+	<title>Dropdown Menu Example</title>
 </head>
 <body>
-	<h1>Content Descriptors</h1>
-	<label for="contentDescriptor">Choose a Content Descriptor:</label>
-	<select id="contentDescriptor">
-		<option value="">Select a Content Descriptor</option>
+	<label for="content-descriptor-select">Select Content Descriptor:</label>
+	<select id="content-descriptor-select">
+		<option value="">--Select--</option>
 	</select>
 
 	<script>
-		$(document).ready(function() {
-			const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-			const apiUrl = 'https://vocabulary.curriculum.edu.au/MRAC/2022/06/LA/HASS/export/MRAC/2022/06/LA/HASS.rdf';
-			const requestUrl = proxyUrl + apiUrl;
+		const contentDescriptorSelect = document.getElementById('content-descriptor-select');
 
-			$.get(requestUrl, function(data) {
-				const xml = $.parseXML(data);
-				const descriptors = $(xml).find('rdf\\:Description');
-				const contentDescriptorSelect = $('#contentDescriptor');
+		fetch('https://australiancurriculum.edu.au/static/elements/2018/05/7f6bd186-fcdf-4e46-a727-9e4600a2a39b-manifest.json')
+			.then(response => response.json())
+			.then(data => {
+				const contentDescriptors = data.map(element => element.contentDescriptor);
+				const uniqueContentDescriptors = [...new Set(contentDescriptors)];
 
-				descriptors.each(function() {
-					const descriptor = $(this);
-					const label = descriptor.find('rdfs\\:label').text();
-
-					if (label !== '') {
-						contentDescriptorSelect.append('<option value="' + label + '">' + label + '</option>');
-					}
+				uniqueContentDescriptors.forEach(descriptor => {
+					const option = document.createElement('option');
+					option.text = descriptor;
+					option.value = descriptor;
+					contentDescriptorSelect.add(option);
 				});
-			});
-		});
+			})
+			.catch(error => console.error(error));
 	</script>
 </body>
 </html>
