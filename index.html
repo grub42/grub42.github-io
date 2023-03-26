@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Content Descriptors Dropdown</title>
+  <title>Content Descriptors</title>
 </head>
 <body>
-  <h1>Content Descriptors Dropdown</h1>
+  <h1>Content Descriptors</h1>
+
+  <label for="year-level">Year Level:</label>
+  <select id="year-level"></select>
+
+  <label for="subject">Subject:</label>
+  <select id="subject"></select>
 
   <label for="content-descriptor">Content Descriptor:</label>
   <select id="content-descriptor"></select>
@@ -14,21 +20,76 @@
     const url = "https://vocabulary.curriculum.edu.au/MRAC/2022/06/LA/HASS/export/MRAC/2022/06/LA/HASS.jsonld";
 
     // Load the JSON data
+    const jsonData = {};
+
     fetch(url)
       .then(response => response.json())
-      .then(jsonData => {
-        populateContentDescriptors(jsonData);
+      .then(json => {
+        const subject = json.subject[0].termCode;
+        const yearLevel = json.educationalLevel[0].termCode;
+
+        if (!jsonData[yearLevel]) {
+          jsonData[yearLevel] = {};
+        }
+
+        if (!jsonData[yearLevel][subject]) {
+          jsonData[yearLevel][subject] = json;
+        }
+
+        populateYearLevels(Object.keys(jsonData));
       })
       .catch(error => console.error(error));
 
-    // Populate the content descriptor dropdown menu
-    function populateContentDescriptors(jsonData) {
-      const dropdown = document.getElementById("content description");
+    // Populate the year level dropdown menu
+    function populateYearLevels(yearLevels) {
+      const dropdown = document.getElementById("year-level");
 
-      jsonData.hasTopConcept.forEach(topConcept => {
+      yearLevels.forEach(yearLevel => {
         const option = document.createElement("option");
-        option.value = topConcept.notation;
-        option.textContent = topConcept.prefLabel.en;
+        option.value = yearLevel;
+        option.textContent = yearLevel;
+        dropdown.appendChild(option);
+      });
+
+      dropdown.addEventListener("change", event => {
+        const selectedYearLevel = event.target.value;
+        populateSubjects(selectedYearLevel);
+      });
+    }
+
+    // Populate the subject dropdown menu
+    function populateSubjects(yearLevel) {
+      const dropdown = document.getElementById("subject");
+      dropdown.textContent = "";
+      dropdown.disabled = false;
+
+      const subjectCodes = Object.keys(jsonData[yearLevel]);
+
+      subjectCodes.forEach(subjectCode => {
+        const option = document.createElement("option");
+        option.value = subjectCode;
+        option.textContent = subjectCode;
+        dropdown.appendChild(option);
+      });
+
+      dropdown.addEventListener("change", event => {
+        const selectedSubject = event.target.value;
+        populateContentDescriptors(yearLevel, selectedSubject);
+      });
+    }
+
+    // Populate the content descriptor dropdown menu
+    function populateContentDescriptors(yearLevel, subject) {
+      const dropdown = document.getElementById("content-descriptor");
+      dropdown.textContent = "";
+      dropdown.disabled = false;
+
+      const contentDescriptors = jsonData[yearLevel][subject].objective;
+
+      contentDescriptors.forEach(contentDescriptor => {
+        const option = document.createElement("option");
+        option.value = contentDescriptor.termCode;
+        option.textContent = contentDescriptor.label;
         dropdown.appendChild(option);
       });
     }
