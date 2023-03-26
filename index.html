@@ -1,28 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Content Descriptor Dropdown</title>
+  <title>Dynamic Dropdown Menu from JSON Data</title>
 </head>
 <body>
-    <label for="content-dropdown">Select a Content Descriptor:</label>
-    <select id="content-dropdown">
-        <option value="">--Please choose an option--</option>
-    </select>
+  <select id="contentDescriptors">
+    <option value="">--Select Content Descriptor--</option>
+  </select>
 
-    <script>
-        const dropdown = document.getElementById('content-dropdown');
-
-        fetch('https://vocabulary.curriculum.edu.au/MRAC/2022/06/LA/HASS/export/MRAC/2022/06/LA/HASS.jsonld')
-            .then(response => response.json())
-            .then(data => {
-                const contentDescriptors = data['graph'][0]['dcterms_description'];
-                contentDescriptors.forEach(contentDescriptor => {
-                    const option = document.createElement('option');
-                    option.value = contentDescriptor;
-                    option.text = contentDescriptor;
-                    dropdown.appendChild(option);
-                });
-            });
-    </script>
+  <script>
+    fetch('https://vocabulary.curriculum.edu.au/MRAC/2022/06/LA/HASS/export/MRAC/2022/06/LA/HASS.jsonld')
+      .then(response => response.json())
+      .then(data => {
+        const contentDescriptors = data['@graph'].map(item => item['dcterms_description']);
+        const select = document.getElementById('contentDescriptors');
+        contentDescriptors.forEach(contentDescriptor => {
+          const option = document.createElement('option');
+          option.value = contentDescriptor;
+          option.textContent = contentDescriptor;
+          select.appendChild(option);
+        });
+      });
+  </script>
 </body>
 </html>
