@@ -1,4 +1,3 @@
- <!DOCTYPE html>
 <html>
 <head>
   <title>Australian Curriculum</title>
@@ -76,6 +75,56 @@
       const dropdown = document.getElementById("subject");
       dropdown.textContent = "";
       dropdown.disabled = false;
+	  const subjects = Object.keys(jsonData[yearLevel]);
+  subjects.forEach(subject => {
+    const option = document.createElement("option");
+    option.value = subject;
+    option.textContent = subject;
+    dropdown.appendChild(option);
+  });
 
-      const subjects = Object.keys(json
+  dropdown.addEventListener("change", event => {
+    const selectedSubject = event.target.value;
+    populateContentDescriptors(yearLevel, selectedSubject);
+  });
+}
+
+// Populate the content descriptor dropdown menu
+function populateContentDescriptors(yearLevel, subject) {
+  const dropdown = document.getElementById("content-descriptor");
+  dropdown.textContent = "";
+  dropdown.disabled = false;
+
+  const contentDescriptors = jsonData[yearLevel][subject].contentDescription;
+  contentDescriptors.forEach(contentDescriptor => {
+    const option = document.createElement("option");
+    option.value = contentDescriptor.termCode;
+    option.textContent = contentDescriptor.text;
+    dropdown.appendChild(option);
+  });
+
+  dropdown.addEventListener("change", event => {
+    const selectedContentDescriptor = event.target.value;
+    populateElaborations(yearLevel, subject, selectedContentDescriptor);
+  });
+}
+
+// Populate the elaboration dropdown menu
+function populateElaborations(yearLevel, subject, contentDescriptor) {
+  const dropdown = document.getElementById("elaboration");
+  dropdown.textContent = "";
+  dropdown.disabled = false;
+
+  const elaborations = jsonData[yearLevel][subject].elaboration;
+  elaborations.forEach(elaboration => {
+    if (elaboration.contentDescription.termCode === contentDescriptor) {
+      const option = document.createElement("option");
+      option.value = elaboration.termCode;
+      option.textContent = elaboration.text;
+      dropdown.appendChild(option);
+    }
+  });
+}  </script>
+</body>
+</html> 
 
