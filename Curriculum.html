@@ -1,130 +1,37 @@
+<!DOCTYPE html>
 <html>
 <head>
-  <title>Australian Curriculum</title>
+  <title>Content Descriptors Dropdown</title>
 </head>
 <body>
-  <h1>Australian Curriculum</h1>
-
-  <label for="year-level">Year Level:</label>
-  <select id="year-level"></select>
-
-  <label for="subject">Subject:</label>
-  <select id="subject"></select>
+  <h1>Content Descriptors Dropdown</h1>
 
   <label for="content-descriptor">Content Descriptor:</label>
   <select id="content-descriptor"></select>
 
-  <label for="elaboration">Elaboration:</label>
-  <select id="elaboration"></select>
-
   <script>
-    // Define the URLs for the JSON data
-    const urls = [
-      "https://vocabulary.curriculum.edu.au/MRAC/2022/06/LA/ART/export/MRAC/2022/06/LA/ART.jsonld",
-      "https://vocabulary.curriculum.edu.au/MRAC/2022/06/LA/ENG/export/MRAC/2022/06/LA/ENG.jsonld",
-      "https://vocabulary.curriculum.edu.au/MRAC/2022/06/LA/HPE/export/MRAC/2022/06/LA/HPE.jsonld",
-      "https://vocabulary.curriculum.edu.au/MRAC/2022/06/LA/HASS/export/MRAC/2022/06/LA/HASS.jsonld",
-      "https://vocabulary.curriculum.edu.au/MRAC/2022/06/LA/LAN/export/MRAC/2022/06/LA/LAN.jsonld",
-      "https://vocabulary.curriculum.edu.au/MRAC/2022/06/LA/MAT/export/MRAC/2022/06/LA/MAT.jsonld",
-      "https://vocabulary.curriculum.edu.au/MRAC/2022/06/LA/SCI/export/MRAC/2022/06/LA/SCI.jsonld",
-      "https://vocabulary.curriculum.edu.au/MRAC/2022/06/LA/TEC/export/MRAC/2022/06/LA/TEC.jsonld"
-    ];
+    // Define the URL for the JSON data
+    const url = "https://vocabulary.curriculum.edu.au/MRAC/2022/06/LA/HASS/export/MRAC/2022/06/LA/HASS.jsonld";
 
     // Load the JSON data
-    const jsonData = {};
-
-    Promise.all(urls.map(url => fetch(url)))
-      .then(responses => Promise.all(responses.map(response => response.json())))
-      .then(jsonArray => {
-        jsonArray.forEach(json => {
-          const subject = json.subject[0].termCode;
-          const yearLevel = json.educationalLevel[0].termCode;
-
-          if (!jsonData[yearLevel]) {
-            jsonData[yearLevel] = {};
-          }
-
-          if (!jsonData[yearLevel][subject]) {
-            jsonData[yearLevel][subject] = json;
-          }
-        });
-
-        populateYearLevels(Object.keys(jsonData));
+    fetch(url)
+      .then(response => response.json())
+      .then(jsonData => {
+        populateContentDescriptors(jsonData);
       })
       .catch(error => console.error(error));
 
-    // Populate the year level dropdown menu
-    function populateYearLevels(yearLevels) {
-      const dropdown = document.getElementById("year-level");
+    // Populate the content descriptor dropdown menu
+    function populateContentDescriptors(jsonData) {
+      const dropdown = document.getElementById("content-descriptor");
 
-      yearLevels.forEach(yearLevel => {
+      jsonData.hasTopConcept.forEach(topConcept => {
         const option = document.createElement("option");
-        option.value = yearLevel;
-        option.textContent = yearLevel;
+        option.value = topConcept.notation;
+        option.textContent = topConcept.prefLabel.en;
         dropdown.appendChild(option);
       });
-
-      dropdown.addEventListener("change", event => {
-        const selectedYearLevel = event.target.value;
-        populateSubjects(selectedYearLevel);
-      });
     }
-
-    // Populate the subject dropdown menu
-    function populateSubjects(yearLevel) {
-      const dropdown = document.getElementById("subject");
-      dropdown.textContent = "";
-      dropdown.disabled = false;
-       const subjects = Object.keys(jsonData[yearLevel]);
-  subjects.forEach(subject => {
-    const option = document.createElement("option");
-    option.value = subject;
-    option.textContent = subject;
-    dropdown.appendChild(option);
-  });
-
-  dropdown.addEventListener("change", event => {
-    const selectedSubject = event.target.value;
-    populateContentDescriptors(yearLevel, selectedSubject);
-  });
-}
-
-// Populate the content descriptor dropdown menu
-function populateContentDescriptors(yearLevel, subject) {
-  const dropdown = document.getElementById("content-descriptor");
-  dropdown.textContent = "";
-  dropdown.disabled = false;
-
-  const contentDescriptors = jsonData[yearLevel][subject].contentDescription;
-  contentDescriptors.forEach(contentDescriptor => {
-    const option = document.createElement("option");
-    option.value = contentDescriptor.termCode;
-    option.textContent = contentDescriptor.text;
-    dropdown.appendChild(option);
-  });
-
-  dropdown.addEventListener("change", event => {
-    const selectedContentDescriptor = event.target.value;
-    populateElaborations(yearLevel, subject, selectedContentDescriptor);
-  });
-}
-
-// Populate the elaboration dropdown menu
-function populateElaborations(yearLevel, subject, contentDescriptor) {
-  const dropdown = document.getElementById("elaboration");
-  dropdown.textContent = "";
-  dropdown.disabled = false;
-
-  const elaborations = jsonData[yearLevel][subject].elaboration;
-  elaborations.forEach(elaboration => {
-    if (elaboration.contentDescription.termCode === contentDescriptor) {
-      const option = document.createElement("option");
-      option.value = elaboration.termCode;
-      option.textContent = elaboration.text;
-      dropdown.appendChild(option);
-    }
-  });
-}
   </script>
 </body>
-</html> 
+</html>
