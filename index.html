@@ -1,26 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dynamic Dropdown Menu from JSON Data</title>
+	<title>Dropdown Menu Example</title>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script>
+		$(document).ready(function() {
+			var proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+			var targetUrl = 'https://grub42.github.io/hass.json';
+
+			$.ajax({
+				url: proxyUrl + targetUrl,
+				method: 'GET',
+				dataType: 'json',
+				success: function(data) {
+					var contentDescriptors = data['content-descriptor'];
+
+					$.each(contentDescriptors, function(index, value) {
+						$('#content-descriptor-dropdown').append($('<option>', {
+							value: value['dcterms_description'],
+							text: value['dcterms_description']
+						}));
+					});
+				},
+				error: function(jqXHR, textStatus, errorThrown) {
+					console.log(textStatus, errorThrown);
+				}
+			});
+		});
+	</script>
 </head>
 <body>
-  <select id="contentDescriptors">
-    <option value="">--Select Content Descriptor--</option>
-  </select>
-
-  <script>
-    fetch('https://vocabulary.curriculum.edu.au/MRAC/2022/06/LA/HASS/export/MRAC/2022/06/LA/HASS.jsonld')
-      .then(response => response.json())
-      .then(data => {
-        const contentDescriptors = data['@graph'].map(item => item['dcterms_description']);
-        const select = document.getElementById('contentDescriptors');
-        contentDescriptors.forEach(contentDescriptor => {
-          const option = document.createElement('option');
-          option.value = contentDescriptor;
-          option.textContent = contentDescriptor;
-          select.appendChild(option);
-        });
-      });
-  </script>
+	<select id="content-descriptor-dropdown"></select>
 </body>
 </html>
