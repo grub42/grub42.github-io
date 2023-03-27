@@ -1,91 +1,13 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Dropdown Example</title>
-  </head>
-  <body>
-    <label for="subject">Subject:</label>
-    <select id="subject">
-      <option value="">--Select--</option>
-    </select>
-    
-    <label for="content_descriptor">Content Descriptor:</label>
-    <select id="content_descriptor">
-      <option value="">--Select--</option>
-    </select>
-    
-    <script>
-      // URL of the SPARQL endpoint
-      const sparqlUrl = 'https://rdf.australiancurriculum.edu.au/api/sparql';
-      
-      // SPARQL query to retrieve the available subjects
-      const subjectQuery = `
-        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-        SELECT DISTINCT ?subjectLabel WHERE {
-          ?subject a skos:ConceptScheme ;
-                   skos:hasTopConcept ?subjectConcept .
-          ?subjectConcept skos:prefLabel ?subjectLabel .
-        } ORDER BY ?subjectLabel
-      `;
-      
-      // SPARQL query to retrieve the available content descriptors for a subject
-      const contentDescriptorQuery = `
-        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-        PREFIX ac: <https://rdf.australiancurriculum.edu.au/def/australian-curriculum/>
-        SELECT DISTINCT ?descriptorUrl ?descriptorLabel WHERE {
-          ?subject a skos:ConceptScheme ;
-                   skos:hasTopConcept ?subjectConcept ;
-                   skos:prefLabel ?subjectLabel .
-          FILTER(?subjectLabel = ?subjectName)
-          ?descriptor skos:inScheme ?subject ;
-                      skos:prefLabel ?descriptorLabel .
-          BIND(REPLACE(STR(?descriptor), "^.*#", "") AS ?descriptorUrl)
-        } ORDER BY ?descriptorLabel
-      `;
-      
-      // Populate the subjects dropdown menu
-      fetch(sparqlUrl + '?query=' + encodeURIComponent(subjectQuery) + '&format=json')
-        .then(response => response.json())
-        .then(data => {
-          const subjects = data.results.bindings.map(binding => binding.subjectLabel.value);
-          
-          // Populate dropdown options with subjects
-          subjects.forEach(subject => {
-            const option = document.createElement('option');
-            option.value = subject;
-            option.text = subject;
-            document.getElementById('subject').appendChild(option);
-          });
-        })
-        .catch(error => console.error(error));
-      
-      // Populate the content descriptors dropdown menu when a subject is selected
-      document.getElementById('subject').addEventListener('change', () => {
-        const selectedSubject = document.getElementById('subject').value;
-        
-        if (!selectedSubject) {
-          // Clear the content descriptors dropdown menu if no subject is selected
-          document.getElementById('content_descriptor').innerHTML = '<option value="">--Select--</option>';
-          return;
-        }
-        
-        const contentDescriptorQueryWithSubjectName = contentDescriptorQuery.replace('?subjectName', `"${selectedSubject}"`);
-        
-        // Fetch content descriptors for the selected subject
-        fetch(sparqlUrl + '?query=' + encodeURIComponent(contentDescriptorQueryWithSubjectName) + '&format=json')
-          .then(response => response.json())
-          .then(data => {
-            const descriptors = data.results.bindings.map(binding => ({ url: binding.descriptorUrl.value, label: binding.descriptorLabel.value }));
-			// Populate dropdown options with content descriptors
-          const contentDescriptorDropdown = document.getElementById('content_descriptor');
-          contentDescriptorDropdown.innerHTML = '<option value="">--Select--</option>';
-          descriptors.forEach(descriptor => {
-            const option = document.createElement('option');
-            option.value = descriptor.url;
-            option.text = descriptor.label;
-            contentDescriptorDropdown.appendChild(option);
-          });
-        })
-        .catch(error => console.error(error));
-    }
-  });
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subject Selection</title>
+</head>
+<body>
+    <h1>Subject Selection</h1>
+    <label for="subject">Choose a subject:</label>
+    <select id="subject"></select>
+    <script src="index.js"></script>
+</body>
+</html>
